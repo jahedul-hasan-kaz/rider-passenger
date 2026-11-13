@@ -1,0 +1,32 @@
+# Signed-out journey: welcome → email validation → sending a code.
+# Email codes are the default sign-in; phone (SMS) appears only in builds with EXPO_PUBLIC_PHONE_SIGN_IN=true.
+# Needs no account: "Send code" either moves on to the code screen or shows an error.
+appId: bd.rider.passenger.dev
+name: Sign-in screens
+tags: [smoke]
+---
+- clearState
+- launchApp
+- assertVisible:
+    id: get-started
+- tapOn:
+    id: get-started
+- assertVisible: "What's your email?"
+# An invalid address keeps the button disabled.
+- tapOn:
+    id: email-input
+- inputText: "not-an-email"
+- assertVisible:
+    id: send-email-code
+    enabled: false
+- eraseText: 30
+- inputText: "maestro.rider@example.com"
+- assertVisible:
+    id: send-email-code
+    enabled: true
+- tapOn:
+    id: send-email-code
+- extendedWaitUntil:
+    visible:
+      text: "Enter the code|Sign-up .*|Too many attempts.*|No connection.*|Something went wrong.*"
+    timeout: 15000

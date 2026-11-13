@@ -1,0 +1,76 @@
+# Signed-in journey on staging: developer sign-in → location → choose vehicle → destination on the map → quote →
+# request → cancel while searching (free). Run against a staging build with a demo passenger account:
+#   maestro test -e EMAIL=<demo passenger email> -e PASSWORD=<password> .maestro/02-book-and-cancel.yaml
+# The emulator's location must be inside a staging service zone (e.g. Banani, Dhaka: 23.7937, 90.4066).
+appId: bd.rider.passenger.dev
+name: Book and cancel
+tags: [e2e]
+---
+- clearState
+- launchApp:
+    permissions:
+      location: allow
+- tapOn:
+    id: get-started
+- tapOn:
+    id: dev-sign-in-link
+- tapOn:
+    id: dev-email
+- inputText: ${EMAIL}
+- tapOn:
+    id: dev-password
+- inputText: ${PASSWORD}
+- tapOn:
+    id: dev-sign-in-submit
+
+# New accounts get the name step; returning ones skip it.
+- runFlow:
+    when:
+      visible:
+        id: name-input
+    commands:
+      - tapOn:
+          id: name-input
+      - inputText: "Test Rider"
+      - tapOn:
+          id: name-continue
+
+# Location gate appears only if permission is not already granted.
+- runFlow:
+    when:
+      visible:
+        id: allow-location
+    commands:
+      - tapOn:
+          id: allow-location
+
+- extendedWaitUntil:
+    visible:
+      id: next-where-to
+    timeout: 20000
+- tapOn:
+    id: next-where-to
+- tapOn: "Pick on map instead"
+- tapOn:
+    id: confirm-pin
+
+# The quote is the server's; just check one is shown.
+- extendedWaitUntil:
+    visible:
+      id: quote-fare
+    timeout: 20000
+- tapOn:
+    id: request-ride
+
+- extendedWaitUntil:
+    visible: "Finding your driver…"
+    timeout: 20000
+- tapOn:
+    id: cancel-ride
+- assertVisible: "Free to cancel"
+- tapOn:
+    id: confirm-cancel
+- extendedWaitUntil:
+    visible: "Ride cancelled"
+    timeout: 15000
+- assertVisible: "You were not charged."

@@ -1,0 +1,33 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      # Placeholder public values so the bundle check can resolve configuration. No secrets are needed for CI.
+      EXPO_PUBLIC_APP_ENV: development
+      EXPO_PUBLIC_API_BASE_URL: http://localhost:3000/api/v1
+      EXPO_PUBLIC_SUPABASE_URL: https://example.supabase.co
+      EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_ci_placeholder
+      EXPO_PUBLIC_MAP_STYLE_URL: https://tiles.openfreemap.org/styles/liberty
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm run check:env
+      - run: npm run check:i18n
+      - run: npm test -- --ci
+      - run: npx expo-doctor
+      - name: Bundle (Android) to catch resolution errors
+        run: npx expo export --platform android --output-dir dist
