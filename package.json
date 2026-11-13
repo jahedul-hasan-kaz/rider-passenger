@@ -4,7 +4,7 @@
   "main": "expo-router/entry",
   "private": true,
   "scripts": {
-    "start": "expo start",
+    "start": "node init && expo start",
     "android": "expo run:android",
     "ios": "expo run:ios",
     "lint": "expo lint",
@@ -14,7 +14,7 @@
     "check:i18n": "node scripts/check-i18n.mjs",
     "check": "npm run typecheck && npm run lint && npm run check:env && npm run check:i18n && npm test -- --ci",
     "doctor": "expo-doctor",
-    "start:local": "node scripts/with-local-backend.mjs expo start"
+    "start:local": "node init && node scripts/with-local-backend.mjs expo start"
   },
   "dependencies": {
     "@expo-google-fonts/hind-siliguri": "^0.4.1",

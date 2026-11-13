@@ -57,6 +57,107 @@ The admin answers CORS for `localhost` origins only when it runs in `local` mode
 
 An Android emulator reaches a local `rider-admin` at `http://10.0.2.2:3000/api/v1`.
 
+## Run the app in an Android emulator
+
+`npx expo run:android` builds a debug development build, installs it on the running emulator and starts Metro.
+There is no `android/` folder in the repo: Expo generates it from `app.config.ts` on the first run (prebuild), and it
+is regenerated whenever native config or plugins change.
+
+By default the app uses the values in `.env.local`, which point at the live backend
+(`https://rider-admin.onrender.com/api/v1`). Use `npm run start:local` only when you want the local backend.
+
+### 1. Prerequisites
+
+Install these on Windows:
+
+- Node.js 22+ and npm
+- JDK 17
+- Android Studio, with Android SDK, SDK Platform-Tools and Android Emulator
+- At least one Android Virtual Device (AVD)
+
+Check them:
+
+```bash
+node -v
+```
+
+```bash
+java -version
+```
+
+```bash
+adb --version
+```
+
+```bash
+emulator -list-avds
+```
+
+If `emulator -list-avds` prints nothing, create a device in Android Studio (Device Manager) first.
+If `adb` or `emulator` is not found, add the SDK's `platform-tools` and `emulator` folders to your `Path`
+(the SDK is usually at `C:\Users\<you>\AppData\Local\Android\Sdk`), or set `ANDROID_HOME` to the SDK folder.
+
+### 2. Configuration
+
+Make sure `.env.local` exists with the `EXPO_PUBLIC_*` values (see "First-time setup"). The app reads them when
+Metro starts, so restart Metro after changing them.
+
+### 3. Build and run
+
+1. Install dependencies:
+
+   ```bash
+   npm install
+   ```
+
+2. Start an emulator from Android Studio, or from the command line:
+
+   ```bash
+   emulator -avd <YOUR_AVD_NAME>
+   ```
+
+3. Confirm ADB sees it (it should be listed as `device`):
+
+   ```bash
+   adb devices
+   ```
+
+4. Build, install and start the app:
+
+   ```bash
+   npm run android
+   ```
+
+   The first build takes several minutes (Gradle downloads its dependencies). The app installs as
+   **Rider (Dev)** with id `bd.rider.passenger.dev`.
+
+5. Later runs: if native code has not changed, you do not need to rebuild. Start Metro and open the installed app:
+
+   ```bash
+   npm start
+   ```
+
+   then press `a` in the Metro terminal.
+
+### 4. Troubleshooting
+
+- **SDK location not found**: create `android/local.properties` with
+  `sdk.dir=C:\\Users\\<you>\\AppData\\Local\\Android\\Sdk`, or set `ANDROID_HOME`.
+- **No emulator detected**: run `adb devices`; start the emulator and wait until it is listed as `device`.
+- **Gradle cache problems**: run `cd android; .\gradlew clean`, then `npm run android` again.
+- **Metro cache problems**: run `npx expo start --clear`.
+- **Native config or a plugin changed**: run `npx expo prebuild --platform android --clean`, then `npm run android`.
+- **App cannot reach the backend**: check `EXPO_PUBLIC_API_BASE_URL` in `.env.local` and restart Metro.
+  A cold Render instance can take up to a minute to answer the first request.
+
+### 5. Checklist
+
+- `npm install` finishes without errors
+- the emulator is running and `adb devices` lists it
+- `npm run android` completes without Gradle errors
+- **Rider (Dev)** opens on the emulator and loads the JavaScript bundle
+- the sign-in screen sends an email code through the live backend
+
 ## Environments
 
 | EAS environment | Build profile | `EXPO_PUBLIC_APP_ENV` | App id |
