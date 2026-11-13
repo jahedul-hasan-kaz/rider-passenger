@@ -43,9 +43,8 @@ example
 /android
 
 # env: only the names file is tracked
-.env
-.env.*
 !.env.example
 
 # test output
 coverage/
+config.bat
